@@ -15,6 +15,18 @@ cap = cv2.VideoCapture(0)
 cap.set(3,Wcam)
 cap.set(4,Hcam)
 
+img_path = os.listdir("images") ; img_path.sort()
+overlayList = []
+
+for path in img_path:
+    image = cv2.resize( cv2.imread(f'images/{path}'),
+                        (200,300),
+                        interpolation=cv2.INTER_AREA
+    )
+
+    overlayList.append(image)
+
+
 detector = handDetector(model_path = "Hand_Tracking_Model/hand_landmarker.task",
                         num_hands = 1,
                         confidence = 0.6
@@ -41,8 +53,10 @@ while True:
     # flipping the image Y-AXIS : 
     img = cv2.flip(img,1)
 
-    # preprocessing
+    # image display
+    img[0:300,1080:1280] = overlayList[0]
 
+    # preprocessing
     img = cv2.cvtColor(img,cv2.COLOR_BGR2RGB)
     mp_img = mp.Image(image_format=mp.ImageFormat.SRGB, data=img)
 
@@ -50,9 +64,28 @@ while True:
 
     lmList = detector.findHands(img,res, draw =True )
 
+    if len(lmList)!=0:
+        lmList = lmList[0]
+        fingers = 0
+
+        if lmList[4][1] < lmList[3][1]:
+            fingers += 1
+
+        for i in range(8,21,4):
+            if lmList[i][2] < lmList[i-2][2]:
+                fingers += 1
+            
+        img[0:300,1080:1280] = overlayList[fingers]
+
+    else :
+        cv2.putText(img,Alert, (40,120), cv2.FONT_HERSHEY_COMPLEX,
+                    1, (183,81,93) , 1
+                    )
+        print(Alert)
+
 
     # display 
-    cv2.putText(img,f'FPS : {str(int(fps))}',(40,70), cv2.FONT_HERSHEY_COMPLEX,
+    cv2.putText(img,f'FPS : {str(int(fps))}',(40,80), cv2.FONT_HERSHEY_COMPLEX,
                 3, (183,81,93) , 1
                 )
     cv2.imshow('Live',cv2.cvtColor(img,cv2.COLOR_RGB2BGR))
