@@ -3,7 +3,7 @@ import cv2
 import mediapipe as mp 
 import os , time 
 from Hand_Tracking_Model.utils import handDetector
-from utils import get_fps
+from utils import get_fps , HUD
 
 
 ##################
@@ -76,6 +76,9 @@ while True:
                 fingers += 1
             
         img[0:300,1080:1280] = overlayList[fingers]
+        print(fingers)
+
+        HUD(img,fingers)
 
     else :
         cv2.putText(img,Alert, (40,120), cv2.FONT_HERSHEY_COMPLEX,
