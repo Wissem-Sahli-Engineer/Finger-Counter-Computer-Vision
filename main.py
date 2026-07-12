@@ -4,6 +4,7 @@ import mediapipe as mp
 import os , time 
 from Hand_Tracking_Model.utils import handDetector
 from utils import get_fps , HUD
+import math
 
 
 ##################
@@ -68,11 +69,20 @@ while True:
         lmList = lmList[0]
         fingers = 0
 
-        if lmList[4][1] < lmList[3][1]:
+        thumb_tip_dist = math.hypot(lmList[4][1] - lmList[17][1], lmList[4][2] - lmList[17][2])
+        thumb_base_dist = math.hypot(lmList[3][1] - lmList[17][1], lmList[3][2] - lmList[17][2])
+        
+        if thumb_tip_dist > thumb_base_dist:
             fingers += 1
 
         for i in range(8,21,4):
-            if lmList[i][2] < lmList[i-2][2]:
+            """"if lmList[i][2] < lmList[i-2][2]:
+                fingers += 1
+            """
+            tip_dist = math.hypot(lmList[i][1] - lmList[0][1], lmList[i][2] - lmList[0][2])
+            pip_dist = math.hypot(lmList[i-2][1] - lmList[0][1], lmList[i-2][2] - lmList[0][2])
+            
+            if tip_dist > pip_dist:
                 fingers += 1
             
         img[0:300,1080:1280] = overlayList[fingers]
